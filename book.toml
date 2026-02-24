@@ -1,0 +1,13 @@
+[book]
+authors = ["Alex Kutzke"]
+language = "pt-br"
+multilingual = false
+src = "src"
+title = "DS881 - DevOps Optativa - Prof. Alex Kutzke"
+
+[output.html]
+additional-css = ["./theme/catppuccin.css"]
+default-theme = "latte"
+preferred-dark-theme = "mocha"
+
+[preprocessor.alerts]
