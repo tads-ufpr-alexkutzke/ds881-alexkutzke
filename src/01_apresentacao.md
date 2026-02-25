@@ -5,7 +5,7 @@ paginate: true
 ---
 
 # Aula 01 - Introdução e Cultura DevOps
-## O que é DevOps?, O Projeto Fênix e Setup Inicial
+## O que é DevOps?
 **Data:** 25/02
 
 ---
@@ -132,14 +132,3 @@ O controle de versão (Git) é a base da Automação (Caminho 1) e do Compartilh
 - Todo o código da aplicação, os Dockerfiles e os manifestos do Kubernetes viverão no Git.
 - O GitHub não é apenas um repositório, mas a plataforma central onde o trabalho se torna visível (Issues, Pull Requests) e onde o Pipeline será executado (GitHub Actions).
 - Podemos utilizar o Codespaces como ambiente *Lean*, eliminando o desperdício de tempo com setups de máquinas locais incompatíveis.
-
----
-
-## Atividade Prática: Setup Inicial
-
-**Checklist da Aula 01:**
-
-- [ ] Acessar/Criar conta no GitHub.
-- [ ] Criar o repositório público: `ds881-2026-1-n-grr00000000-portfolio-lab`.
-- [ ] Inicializar o repositório com um `README.md`, baseado [no template sugerido](https://github.com/alexkutzke/ds881-2026-1-n-grr00000000-portfolio-lab);
-- [ ] Realizar o `git add`, `git commit` e `git push`.
