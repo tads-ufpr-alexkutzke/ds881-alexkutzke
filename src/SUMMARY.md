@@ -4,3 +4,4 @@
 - [Apresentação da Disciplina](./01_apresentacao.md)
 - [Git para DevOps](./02_git_e_devops.md)
 - [Introdução ao Docker](./03_docker.md)
+- [Docker: otimização de imagens](./04_docker_otimizacao_imagens.md)
