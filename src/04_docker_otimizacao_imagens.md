@@ -70,13 +70,11 @@ CMD ["/meu_app"]
 ## 4. Leituras Recomendadas
 
 1. **Documentação Oficial: Multi-stage builds**
-   * Link: `https://docs.docker.com/build/building/multi-stage/`
+   * Link: [https://docs.docker.com/build/building/multi-stage/](https://docs.docker.com/build/building/multi-stage/)
    * Descrição: Guia definitivo sobre a sintaxe e casos de uso avançados, como parar em estágios específicos e usar imagens externas como estágio.
 2. **Boas Práticas para escrever Dockerfiles (Docker Docs)**
-   * Link: `https://docs.docker.com/develop/develop-images/dockerfile_best-practices/`
+   * Link: [https://docs.docker.com/develop/develop-images/dockerfile_best-practices/](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
    * Descrição: Cobre conceitos de cache, ordenação de instruções e formatação.
 3. **Google Distroless GitHub Repository**
-   * Link: `https://github.com/GoogleContainerTools/distroless`
+   * Link: [https://github.com/GoogleContainerTools/distroless](https://github.com/GoogleContainerTools/distroless)
    * Descrição: O repositório oficial das imagens distroless, contendo explicações sobre o conceito e como utilizar com diferentes linguagens (Java, Node, Python, Rust).
-4. **Artigo: "Why you should use distroless images"**
-   * Link: (Pesquisar em blogs técnicos de segurança de containers, como Snyk ou Aqua Security, pelos guias introdutórios de distroless). Explora o impacto na mitigação de vulnerabilidades (CVEs).
