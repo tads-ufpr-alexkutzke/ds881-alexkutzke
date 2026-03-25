@@ -94,7 +94,7 @@ Acessando `localhost:8080`, a instalação do WordPress estará pronta e conecta
 
 No ambiente de desenvolvimento, queremos escrever o código na nossa IDE (no host) e ver a mudança refletida imediatamente dentro do contêiner, sem precisar realizar o `docker build` a cada salvamento. Isso é feito com um **Bind Mount**.
 
-### Exemplo: Ambiente Node.js (Express)
+### Exemplo: Ambiente Node.js (NestJS)
 
 **Arquivo: `Dockerfile.dev`**
 ```dockerfile
@@ -131,4 +131,3 @@ docker run -d \
 * **Docker Volumes:** [https://docs.docker.com/storage/volumes/](https://docs.docker.com/storage/volumes/)
 * **Docker Bind Mounts:** [https://docs.docker.com/storage/bind-mounts/](https://docs.docker.com/storage/bind-mounts/)
 * **Docker Network Drivers:** [https://docs.docker.com/network/](https://docs.docker.com/network/)
-* **Networking Tutorial:** [https://docs.docker.com/network/network-tutorial-standalone/](https://docs.docker.com/network/network-tutorial-standalone/)
