@@ -37,6 +37,21 @@ O GitHub só reconhecerá os seus workflows se eles estiverem salvos no diretór
 
 ## 5. Exemplo: Hello World
 
+Crie um novo repositório no GitHub, e adicione o arquivo `.github/workflows/hello.yml` com o seguinte conteúdo:
+
+```yml
+name: Meu Primeiro Workflow
+
+on: [push]
+
+jobs:
+  imprimir-mensagem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Executar comando no terminal
+        run: echo "Hello World! O GitHub Actions está funcionando."
+```
+
 ## 6. Exemplo Prático: Workflow de CI em Python
 
 Abaixo, a anatomia de um arquivo YAML de integração contínua (ex: `.github/workflows/ci.yml`).
