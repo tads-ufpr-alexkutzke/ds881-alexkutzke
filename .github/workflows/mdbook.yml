@@ -1,10 +1,13 @@
-# Sample workflow for building and deploying a mdBook site to GitHub Pages
+# Sample workflow for building and deploying a mdBook site to GitHub Pag# Sample workflow for building and deploying a mdBook site to GitHub Pages
 #
 # To get started with mdBook see: https://rust-lang.github.io/mdBook/index.html
 #
 name: mdBook deploy
 
 on:
+  schedule:
+    # Runs at 00:00 UTC (21:00 BRT) every Wednesday night / Thursday morning
+    - cron: '0 0 * * *'
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
@@ -32,17 +35,55 @@ jobs:
       MDBOOK_VERSION: 0.5.2
     steps:
       - uses: actions/checkout@v4
+      
       - name: Install mdBook
         run: |
           curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf -y | sh
           rustup update
           cargo install --version ${MDBOOK_VERSION} mdbook
           cargo install mdbook-alerts
+          
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
+        
       - name: Build with mdBook
         run: mdbook build
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run scoreboard generator for tarde
+        working-directory: ./bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.EXTERNAL_REPO_TOKEN }}
+        run: |
+          python3 generate_scoreboard.py \
+            -r "ds881-2026-alexkutzke/ds881-devmarket-2026-1-t" \
+            -s "2026-05-07T21:00:00-03:00" \
+            -i ds881-2026-1-t-alunos.csv \
+            -o ds881-2026-1-t-placar.html \
+            -w 5 
+          python3 generate_scoreboard.py \
+            -r "ds881-2026-alexkutzke/ds881-devmarket-2026-1-n" \
+            -s "2026-05-06T21:00:00-03:00" \
+            -i ds881-2026-1-n-alunos.csv \
+            -o ds881-2026-1-n-placar.html \
+            -w 5 
+          
+
+      - name: Move HTML files to deploy directory
+        run: |
+          mv bin/ds881-2026-1-n-placar.html ./book/
+          mv bin/ds881-2026-1-t-placar.html ./book/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -58,4 +99,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4es

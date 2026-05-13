@@ -9,3 +9,4 @@
 - [Docker Compose](./06_docker_compose.md)
 - [Github Actions (CI/CD)](./07_github_actions.md)
 - [Kubernetes](./08_kubernetes.md)
+- [Especificação Projeto Final](./especificacao_2026_1_devmarket.mdd)

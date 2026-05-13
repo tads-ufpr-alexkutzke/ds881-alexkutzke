@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placar DevMarket</title>
+    <style>
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:#f4f7f6; color:#333; margin:0; padding:20px; }
+        .container { max-width:1300px; margin:auto; background:white; padding:30px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,.1); }
+        h1, h2 { color:#1c3d59; text-align:center; }
+        .ranking { display:flex; justify-content:space-around; margin-bottom:40px; background:#eef2f3; padding:20px; border-radius:8px; flex-wrap:wrap; gap:10px; }
+        .ranking-item { text-align:center; padding:10px; border-radius:8px; background:white; min-width:200px; box-shadow:0 2px 4px rgba(0,0,0,.05); }
+        .ranking-item.first { border:2px solid #ffd700; transform:scale(1.1); }
+        .ranking-item.second { border:2px solid #c0c0c0; }
+        .ranking-item.third { border:2px solid #cd7f32; }
+        table { width:100%; border-collapse:collapse; margin-top:20px; font-size:.9em; }
+        th, td { padding:8px 10px; text-align:center; border-bottom:1px solid #ddd; }
+        th { background:#33495e; color:white; position:sticky; top:0; z-index:1; }
+        td:first-child, td:nth-child(2), td:nth-child(3) { text-align:left; }
+        tr:hover { background:#f1f1f1; }
+        .score { font-weight:bold; color:#27ae60; font-size:1.1em; }
+        .score-good { color:#27ae60; }
+        .score-bad { color:#e74c3c; }
+        .devops-tag { background:#e8eaed; padding:2px 8px; border-radius:4px; font-size:.8em; }
+        .footer { margin-top:30px; font-size:.8em; color:#777; text-align:center; }
+        .details { font-size:.78em; color:#666; max-width:320px; text-align:left; }
+        .period-info { text-align:center; color:#555; font-size:.9em; margin-bottom:10px; }
+        .table-wrap { overflow-x:auto; }
+        .week-subtitle { text-align:center; color:#777; font-size:.8em; margin-top:-10px; margin-bottom:20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 DevMarket — Placar de Engajamento</h1>
+        <p class="period-info">Período: 06/05 a 13/05 21:00 | Encerra quarta-feira às 21h BRT</p>
+
+        <div class="ranking">
+                <div class="ranking-item first">
+                    <div style="font-size:2em;">🥇</div>
+                    <div style="font-weight:bold;">Angelo Chiavegatti Prebianca</div>
+                    <div style="font-size:0.85em;color:#666;">Tech Lead Frontend</div>
+                    <div class="score">3.0 pts</div>
+                </div>
+                <div class="ranking-item second">
+                    <div style="font-size:2em;">🥈</div>
+                    <div style="font-weight:bold;">Anna Luiza Mariano</div>
+                    <div style="font-size:0.85em;color:#666;">Tech Lead Frontend</div>
+                    <div class="score">3.0 pts</div>
+                </div>
+                <div class="ranking-item third">
+                    <div style="font-size:2em;">🥉</div>
+                    <div style="font-weight:bold;">Eduardo Kaiqeu</div>
+                    <div style="font-size:0.85em;color:#666;">Product Owner</div>
+                    <div class="score">3.0 pts</div>
+                </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Aluno</th><th>Grupo</th><th>Papel</th><th title="06/05 – 13/05 21:00">Semana 1</th><th>Total</th><th>Detalhes</th></tr>
+                </thead>
+                <tbody>
+                                        <tr>
+                        <td>Angelo Chiavegatti Prebianca<br><small><a href="https://github.com/AngeloPre" target="_blank">@AngeloPre</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Tech Lead Frontend</td><td class="score-good">1.0</td><td class="score">3.0</td><td class="details">S1:✅1.0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Anna Luiza Mariano<br><small><a href="https://github.com/annaluiza29" target="_blank">@annaluiza29</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Tech Lead Frontend</td><td class="score-good">1.0</td><td class="score">3.0</td><td class="details">S1:✅1.0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Eduardo Kaiqeu<br><small><a href="https://github.com/EduKaique" target="_blank">@EduKaique</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Product Owner</td><td class="score-good">1.0</td><td class="score">3.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅ | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Joao Victor Mota Machado<br><small><a href="https://github.com/jvmotadev" target="_blank">@jvmotadev</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Scrum Master</td><td class="score-good">1.0</td><td class="score">3.0</td><td class="details">S1:✅1.0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Rafael Fernando Nunho Correr<br><small><a href="https://github.com/RCorrer" target="_blank">@RCorrer</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Tech Lead Frontend</td><td class="score-good">1.0</td><td class="score">3.0</td><td class="details">S1:✅1.0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Fellipe Gabriel Gonçalves de Araújo<br><small><a href="https://github.com/fellipegabriel" target="_blank">@fellipegabriel</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Tech Lead Frontend</td><td class="score-bad">0.0</td><td class="score">2.0</td><td class="details">S1:❌0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Henrique Ulbrich de Souza<br><small><a href="https://github.com/Henriqueulb" target="_blank">@Henriqueulb</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Tech Lead Frontend</td><td class="score-bad">0.0</td><td class="score">2.0</td><td class="details">S1:❌0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Joao Pedro Goncalves Cardoso<br><small><a href="https://github.com/mrjpedro" target="_blank">@mrjpedro</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Product Owner</td><td class="score-bad">0.0</td><td class="score">2.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌ | 👑liderança +2 | <span style='color:orange'>⚠️ PO/SM sem issues</span></td></tr>
+                    <tr>
+                        <td>Luiz Antonio Goncalves<br><small><a href="https://github.com/luizantonio0" target="_blank">@luizantonio0</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Scrum Master</td><td class="score-bad">0.0</td><td class="score">2.0</td><td class="details">S1:❌0 | 👑liderança +2 | <span style='color:orange'>⚠️ PO/SM sem issues</span></td></tr>
+                    <tr>
+                        <td>Matheus Xavier<br><small><a href="https://github.com/Mateus-x" target="_blank">@Mateus-x</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Tech Lead Frontend</td><td class="score-bad">0.0</td><td class="score">2.0</td><td class="details">S1:❌0 | 👑liderança +2</td></tr>
+                    <tr>
+                        <td>Andre Luiz Leme<br><small><a href="https://github.com/andrelleme" target="_blank">@andrelleme</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0</td></tr>
+                    <tr>
+                        <td>Arthur Henrique Deretti<br><small><a href="https://github.com/Arthur-Deretti" target="_blank">@Arthur-Deretti</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Artur Falavinha<br><small><a href="https://github.com/Artur-Falavinha" target="_blank">@Artur-Falavinha</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0</td></tr>
+                    <tr>
+                        <td>Ender Efrain Ruiz Carrasco<br><small><a href="https://github.com/eruiz19" target="_blank">@eruiz19</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Enzo Spironelli Pinheiro<br><small><a href="https://github.com/Spirou1" target="_blank">@Spirou1</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0</td></tr>
+                    <tr>
+                        <td>GAbriel BRasil<br><small><a href="https://github.com/xXbrasilXx" target="_blank">@xXbrasilXx</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Henrique Ramos<br><small><a href="https://github.com/HenriqueRamos00" target="_blank">@HenriqueRamos00</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Ingrid Cristine Rocha<br><small><a href="https://github.com/ingridcriistine" target="_blank">@ingridcriistine</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>João Fanti<br><small><a href="https://github.com/JoaoFanti-UFPR" target="_blank">@JoaoFanti-UFPR</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Joelinton Dorte<br><small><a href="https://github.com/joeaustein" target="_blank">@joeaustein</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Kauan Kelvin Alves Macedo<br><small><a href="https://github.com/kauan-macedo" target="_blank">@kauan-macedo</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Luiz Henrique Schecheli Bussolo<br><small><a href="https://github.com/Luiz-Bussolo" target="_blank">@Luiz-Bussolo</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Marcos Renato<br><small><a href="https://github.com/marcosrenatodev" target="_blank">@marcosrenatodev</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Matheus Henrique Bueno Kruger<br><small><a href="https://github.com/G3er" target="_blank">@G3er</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0</td></tr>
+                    <tr>
+                        <td>Matheus Nunes Santana<br><small><a href="https://github.com/Humanaice" target="_blank">@Humanaice</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Milena Dourado<br><small><a href="https://github.com/milena579" target="_blank">@milena579</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Pedro Lemos<br><small><a href="https://github.com/LoureiroLemos" target="_blank">@LoureiroLemos</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0</td></tr>
+                    <tr>
+                        <td>Rhuan Martins<br><small><a href="https://github.com/rhuwp" target="_blank">@rhuwp</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Thiago Avanço Zambon<br><small><a href="https://github.com/GUINH0-0" target="_blank">@GUINH0-0</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Tomaz Cantarelli Xavier<br><small><a href="https://github.com/tomazcx" target="_blank">@tomazcx</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Victor Hugo Betoni<br><small><a href="https://github.com/victorbetoni" target="_blank">@victorbetoni</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0</td></tr>
+                    <tr>
+                        <td>Vitor Adriel Deganelli Espinoza Moya<br><small><a href="https://github.com/VitorEspinoza" target="_blank">@VitorEspinoza</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Yasmin Allanny Calderon Silva<br><small><a href="https://github.com/yasmin-calderon" target="_blank">@yasmin-calderon</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-good">1.0</td><td class="score">1.0</td><td class="details">S1:✅1.0 | 📋CONTRIBUTORS ✅</td></tr>
+                    <tr>
+                        <td>Emanuelle Rodrigues Silverio<br><small><a href="https://github.com/emanuelle-silverio" target="_blank">@emanuelle-silverio</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Eric de Oliveira Rosa<br><small><a href="https://github.com/erosa-dev" target="_blank">@erosa-dev</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Jeanluca Vergopolan<br><small><a href="https://github.com/N/A" target="_blank">@N/A</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score">0.0</td><td class="details">Usuário GitHub não informado</td></tr>
+                    <tr>
+                        <td>João Nossol<br><small><a href="https://github.com/CaIxoDarksixo" target="_blank">@CaIxoDarksixo</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Joao Victor Leal Goncalves<br><small><a href="https://github.com/joao-0213" target="_blank">@joao-0213</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>João Vitor Alves Buss<br><small><a href="https://github.com/buss-dev" target="_blank">@buss-dev</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Leonardo de Lima Pereira<br><small><a href="https://github.com/N/A" target="_blank">@N/A</a></small></td>
+                        <td><span class="devops-tag">Grupo A</span></td>
+                        <td>Desenvolvedor</td><td class="score">0.0</td><td class="details">Usuário GitHub não informado</td></tr>
+                    <tr>
+                        <td>Luan Lourenco Sauer<br><small><a href="https://github.com/N/A" target="_blank">@N/A</a></small></td>
+                        <td><span class="devops-tag">Grupo C</span></td>
+                        <td>Desenvolvedor</td><td class="score">0.0</td><td class="details">Usuário GitHub não informado</td></tr>
+                    <tr>
+                        <td>Lucas Frison Gonçalves<br><small><a href="https://github.com/N/A" target="_blank">@N/A</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score">0.0</td><td class="details">Usuário GitHub não informado</td></tr>
+                    <tr>
+                        <td>Maria Eduarda Ferreira Carvalho<br><small><a href="https://github.com/N/A" target="_blank">@N/A</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score">0.0</td><td class="details">Usuário GitHub não informado</td></tr>
+                    <tr>
+                        <td>Mario Morais Neto<br><small><a href="https://github.com/conplexx" target="_blank">@conplexx</a></small></td>
+                        <td><span class="devops-tag">Grupo D</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                    <tr>
+                        <td>Rafael Luis Pomponio<br><small><a href="https://github.com/pompssss" target="_blank">@pompssss</a></small></td>
+                        <td><span class="devops-tag">Grupo B</span></td>
+                        <td>Desenvolvedor</td><td class="score-bad">0.0</td><td class="score">0.0</td><td class="details">S1:❌0 | 📋CONTRIBUTORS ❌</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="week-subtitle">
+            📌 Até 1.0 pt/semana por engajamento (PRs, reviews, commits DevOps). Bônus de liderança (+2) é único.
+        </div>
+
+        <div class="footer">
+            Gerado em: 13/05/2026 19:42 BRT | Regras CALMS
+        </div>
+    </div>
+</body>
+</html>
