@@ -232,13 +232,13 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
     for issue in all_issues:
         if "pull_request" in issue:
             continue
-        creator = issue["user"]["login"]
+        creator = issue["user"]["login"].lower()
         user_issues.setdefault(creator, []).append(issue)
 
     # Index PRs by author
     user_prs: dict[str, list] = {}
     for pr in all_prs:
-        author = pr["user"]["login"]
+        author = pr["user"]["login"].lower()
         user_prs.setdefault(author, []).append(pr)
 
     # Index reviews by reviewer
@@ -250,14 +250,14 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
                 user_info = r.get("user")
                 if user_info is None:
                     continue  # ghost / deleted user
-                reviewer = user_info["login"]
+                reviewer = user_info["login"].lower()
                 user_reviews.setdefault(reviewer, []).append(r)
         except Exception as exc:
             print(f"  Error fetching reviews for PR #{pr.get('number', '?')}: {exc}")
 
     scoreboard = []
     for student in students:
-        username = student["github"]
+        username = student["github"].lower() if student["github"] else None
 
         # Students without GitHub handle get 0 everywhere
         if not username:
@@ -326,7 +326,7 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
                 commits_in_week = sum(
                     1 for c in all_commits
                     if c.get("author")
-                    and c["author"]["login"] == username
+                    and c["author"]["login"].lower() == username
                     and _is_in_week(
                         _safe_parse_github_dt(_parse_commit_date(c)),
                         week,
