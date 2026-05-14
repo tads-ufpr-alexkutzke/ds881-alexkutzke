@@ -210,6 +210,13 @@ def fetch_issues(repo: str, since: datetime):
     )
 
 
+def fetch_path_commits(repo: str, path: str, since: datetime):
+    """Fetch commits that touched a specific path since a given date."""
+    return fetch_github_data(
+        repo, "commits", {"path": path, "since": _utc_iso(since)},
+    )
+
+
 # ── Scoring ─────────────────────────────────────────────────────────────────
 
 def _parse_commit_date(commit: dict):
@@ -225,7 +232,7 @@ def _is_in_week(dt, week):
     return dt is not None and week["start"] <= dt < week["end"]
 
 
-def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: str):
+def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: str, contrib_usernames: set):
     """Compute per-week and cumulative scores for every student."""
     # Index issues by creator (exclude PR entries returned by GitHub's issues API)
     user_issues: dict[str, list] = {}
@@ -280,14 +287,24 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
         # One-time bonuses
         leadership_bonus = LEADERSHIP_BONUS if fixed_role else 0.0
 
-        # CONTRIBUTORS.md task — checked ONLY in the first week, for non-devops non-TLs
-        first_week = weeks[0] if weeks else None
-        contrib_done = any(
-            "CONTRIBUTORS" in pr.get("title", "").upper() and
-            _is_in_week(_safe_parse_github_dt(pr.get("created_at")), first_week)
-            for pr in user_prs.get(username, [])
-        ) if first_week else False
+        # CONTRIBUTORS.md task — checked in the first week (or by path commits)
+        contrib_done = username in contrib_usernames
 
+        # Global metrics
+        merged_prs = [
+            pr for pr in user_prs.get(username, [])
+            if pr.get("merged_at") is not None
+        ]
+        num_merged = len(merged_prs)
+
+        # Technical Obligation (2.0 pts): 2 merged PRs + 2 reviews
+        total_reviews = len(user_reviews.get(username, []))
+        tech_obligation_done = num_merged >= 2 and total_reviews >= 2
+        tech_obligation_points = 2.0 if tech_obligation_done else 0.0
+
+        # High Productivity bonus (0.5 pts): > 4 issues closed (approximated by merged PRs)
+        high_prod_bonus = 0.5 if num_merged > 4 else 0.0
+        
         # PO/SM alert — no issues at all across all time
         po_sm_has_issues = bool(user_issues.get(username)) if is_po_sm else False
 
@@ -347,10 +364,11 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
                     week_details.append(f"{issues_in_week} issue(s) gestão")
 
             if week_engaged:
-                week_score += WEEKLY_ENGAGEMENT_POINTS
+                # Cap weekly engagement at 1.0 point as per specification 13.1
+                week_score = min(WEEKLY_ENGAGEMENT_POINTS, 1.0)
                 details_str = " | ".join(week_details)
             else:
-                details_str = "<span style='color:red'>Sem engajamento</span>"
+                details_str = "Sem engajamento"
 
             weekly_scores.append({
                 "score": week_score,
@@ -360,10 +378,18 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
 
         # ── Cumulative ───────────────────────────────────────────────────
         weekly_total = sum(ws["score"] for ws in weekly_scores)
-        cumulative = weekly_total + leadership_bonus
+        # Total score can exceed 10.0 points due to bonuses
+        cumulative = (
+            weekly_total + leadership_bonus + 
+            tech_obligation_points + high_prod_bonus
+        )
 
         # ── Details string ───────────────────────────────────────────────
         all_details = []
+
+        # Technical Obligation tag
+        tech_tag = "✅" if tech_obligation_done else "❌"
+        all_details.append(f"🛠️Técnica {tech_tag}")
 
         # Compact per-week summary
         week_summaries = []
@@ -373,14 +399,19 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
             week_summaries.append(f"S{i+1}:{marker}{score_str}")
         all_details.append(" ".join(week_summaries))
 
-        # CONTRIBUTORS check for non-devops, non-TL
-        if not is_tech_lead and not is_devops:
-            tag = "✅" if contrib_done else "❌"
-            all_details.append(f"📋CONTRIBUTORS {tag}")
+        # CONTRIBUTORS check: show ✅ for everyone who did it, ❌ only for non-exempt
+        if contrib_done:
+            all_details.append("📋CONTRIBUTORS ✅")
+        elif not is_tech_lead and not is_devops:
+            all_details.append("📋CONTRIBUTORS ❌")
 
         # Leadership bonus
         if fixed_role:
             all_details.append(f"👑liderança +{leadership_bonus:.0f}")
+
+        # High Productivity bonus
+        if high_prod_bonus > 0:
+            all_details.append(f"🚀produtividade +{high_prod_bonus:.1f}")
 
         # PO/SM alert
         if is_po_sm and not po_sm_has_issues:
@@ -405,11 +436,18 @@ def _to_brt_now_str():
     return datetime.now().astimezone(BRT).strftime("%d/%m/%Y %H:%M BRT")
 
 
-def generate_html(scoreboard, weeks_for_display):
+def generate_html(scoreboard, weeks_for_display, project_start: datetime):
     scoreboard.sort(key=lambda x: x["cumulative"], reverse=True)
 
     now_str = _to_brt_now_str()
     last_week = weeks_for_display[-1] if weeks_for_display else {"end_str": "—"}
+
+    # Portuguese day of week names
+    days_pt = [
+        "segunda-feira", "terça-feira", "quarta-feira",
+        "quinta-feira", "sexta-feira", "sábado", "domingo"
+    ]
+    start_day_name = days_pt[project_start.weekday()]
 
     # Table header
     table_headers = "<tr><th>Aluno</th><th>Grupo</th><th>Papel</th>"
@@ -429,7 +467,7 @@ def generate_html(scoreboard, weeks_for_display):
                         <td>{item['role']}</td>"""
         for ws in item["weekly_scores"]:
             cls = "score-good" if ws["score"] > 0 else "score-bad"
-            row += f'<td class="{cls}">{ws["score"]:.1f}</td>'
+            row += f'<td class="{cls}" title="{ws["details"]}">{ws["score"]:.1f}</td>'
         row += f'<td class="score">{item["cumulative"]:.1f}</td>'
         row += f'<td class="details">{item["details"]}</td></tr>'
         table_rows_parts.append(row)
@@ -485,7 +523,7 @@ def generate_html(scoreboard, weeks_for_display):
 <body>
     <div class="container">
         <h1>🏆 DevMarket — Placar de Engajamento</h1>
-        <p class="period-info">Período: {period_start} a {last_week["end_str"]} | Encerra quarta-feira às 21h BRT</p>
+        <p class="period-info">Período: {period_start} a {last_week["end_str"]} | Encerra {start_day_name} às {project_start.strftime("%H:%M")} BRT</p>
 
         <div class="ranking">
 {podium_items}
@@ -573,18 +611,28 @@ if __name__ == "__main__":
         prs = fetch_all_prs(repo)
         commits = fetch_commits(repo, args.branch, project_start)
         issues = fetch_issues(repo, project_start)
-        print(f"  PRs: {len(prs)} | Commits: {len(commits)} | Issues: {len(issues)}")
+        
+        # Robust CONTRIBUTORS.md check
+        contrib_commits = fetch_path_commits(repo, "CONTRIBUTORS.md", project_start)
+        contrib_usernames = {
+            c["author"]["login"].lower() 
+            for c in contrib_commits 
+            if c.get("author") and c["author"].get("login")
+        }
+
+        print(f"  PRs: {len(prs)} | Commits: {len(commits)} | Issues: {len(issues)} | Contributors: {len(contrib_usernames)}")
     except Exception as exc:
         print(f"Error fetching GitHub data: {exc}. Using empty data.")
         prs = []
         commits = []
         issues = []
+        contrib_usernames = set()
 
     # Score
-    scoreboard = calculate_scores(students, prs, commits, issues, weeks, repo)
+    scoreboard = calculate_scores(students, prs, commits, issues, weeks, repo, contrib_usernames)
 
     # Output
-    html = generate_html(scoreboard, weeks)
+    html = generate_html(scoreboard, weeks, project_start)
     with open(args.output, "w", encoding="utf-8") as f:
         f.write(html)
 
