@@ -376,11 +376,11 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
                 "details": details_str,
             })
 
-        # ── Cumulative ───────────────────────────────────────────────────
+        # ── Cumulative (Scoreboard ranking) ──────────────────────────────
+        # Note: Leadership bonus is NOT summed for the scoreboard as per request.
         weekly_total = sum(ws["score"] for ws in weekly_scores)
-        # Total score can exceed 10.0 points due to bonuses
         cumulative = (
-            weekly_total + leadership_bonus + 
+            weekly_total + 
             tech_obligation_points + high_prod_bonus
         )
 
@@ -541,11 +541,12 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
         </div>
 
         <div class="week-subtitle">
-            📌 Até {WEEKLY_ENGAGEMENT_POINTS:.1f} pt/semana por engajamento (PRs, reviews, commits DevOps). Bônus de liderança (+{LEADERSHIP_BONUS:.0f}) é único.
+            📌 Até {WEEKLY_ENGAGEMENT_POINTS:.1f} pt/semana por engajamento (PRs, reviews, commits DevOps). Bônus de liderança (+{LEADERSHIP_BONUS:.0f}) é apenas para nota final (não somado ao placar).
         </div>
 
         <div class="footer">
-            Gerado em: {now_str} | Regras CALMS
+            Gerado em: {now_str} | Regras CALMS<br>
+            <strong>Aviso:</strong> os pontos de liderança são apenas para nota na disciplina e não para contabilização do placar.
         </div>
     </div>
 </body>
