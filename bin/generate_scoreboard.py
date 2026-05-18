@@ -275,6 +275,7 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
                 "role": student["fixed_role"] or "Desenvolvedor",
                 "weekly_scores": [],
                 "cumulative": 0.0,
+                "participation_points": 0,
                 "details": "Usuário GitHub não informado",
             })
             continue
@@ -384,6 +385,9 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
             tech_obligation_points + high_prod_bonus
         )
 
+        # Participation Points for Final Prize (merged PRs + total reviews)
+        participation_points = num_merged + total_reviews
+
         # ── Details string ───────────────────────────────────────────────
         all_details = []
 
@@ -424,6 +428,7 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
             "role": fixed_role or "Desenvolvedor",
             "weekly_scores": weekly_scores,
             "cumulative": cumulative,
+            "participation_points": participation_points,
             "details": " | ".join(all_details),
         })
 
@@ -437,7 +442,11 @@ def _to_brt_now_str():
 
 
 def generate_html(scoreboard, weeks_for_display, project_start: datetime):
+    # Sort for the table (by Grade/Cumulative)
     scoreboard.sort(key=lambda x: x["cumulative"], reverse=True)
+
+    # Top-3 for the podium based on Participation
+    podium_list = sorted(scoreboard, key=lambda x: x["participation_points"], reverse=True)
 
     now_str = _to_brt_now_str()
     last_week = weeks_for_display[-1] if weeks_for_display else {"end_str": "—"}
@@ -455,7 +464,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
         table_headers += (
             f'<th title="{w["start_str"]} – {w["end_str"]}">{w["name"]}</th>'
         )
-    table_headers += "<th>Total</th><th>Detalhes</th></tr>"
+    table_headers += "<th>Nota</th><th>Partic.</th><th>Detalhes</th></tr>"
 
     # Table body
     table_rows_parts = []
@@ -469,6 +478,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
             cls = "score-good" if ws["score"] > 0 else "score-bad"
             row += f'<td class="{cls}" title="{ws["details"]}">{ws["score"]:.1f}</td>'
         row += f'<td class="score">{item["cumulative"]:.1f}</td>'
+        row += f'<td class="score">{item["participation_points"]}</td>'
         row += f'<td class="details">{item["details"]}</td></tr>'
         table_rows_parts.append(row)
     table_rows = "\n".join(table_rows_parts)
@@ -476,14 +486,14 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
     # Top-3 podium
     podium_items_parts = []
     medals = [("first", "🥇"), ("second", "🥈"), ("third", "🥉")]
-    for i, item in enumerate(scoreboard[:3]):
+    for i, item in enumerate(podium_list[:3]):
         place, icon = medals[i]
         podium_items_parts.append(f"""\
                 <div class="ranking-item {place}">
                     <div style="font-size:2em;">{icon}</div>
                     <div style="font-weight:bold;">{item['name']}</div>
                     <div style="font-size:0.85em;color:#666;">{item['role']}</div>
-                    <div class="score">{item['cumulative']:.1f} pts</div>
+                    <div class="score">{item['participation_points']} pts</div>
                 </div>""")
     podium_items = "\n".join(podium_items_parts)
 
@@ -518,6 +528,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
         .period-info {{ text-align:center; color:#555; font-size:.9em; margin-bottom:10px; }}
         .table-wrap {{ overflow-x:auto; }}
         .week-subtitle {{ text-align:center; color:#777; font-size:.8em; margin-top:-10px; margin-bottom:20px; }}
+        .podium-title {{ text-align:center; font-weight:bold; color:#1c3d59; margin-bottom:15px; font-size:1.2em; }}
     </style>
 </head>
 <body>
@@ -525,6 +536,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
         <h1>🏆 DevMarket — Placar de Engajamento</h1>
         <p class="period-info">Período: {period_start} a {last_week["end_str"]} | Encerra {start_day_name} às {project_start.strftime("%H:%M")} BRT</p>
 
+        <div class="podium-title">🏅 Top Participação (Prêmio Final)</div>
         <div class="ranking">
 {podium_items}
         </div>
@@ -541,12 +553,13 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime):
         </div>
 
         <div class="week-subtitle">
-            📌 Até {WEEKLY_ENGAGEMENT_POINTS:.1f} pt/semana por engajamento (PRs, reviews, commits DevOps). Bônus de liderança (+{LEADERSHIP_BONUS:.0f}) é apenas para nota final (não somado ao placar).
+            📌 <strong>Nota:</strong> Pontos para a disciplina (até {WEEKLY_ENGAGEMENT_POINTS:.1f} pt/semana + bônus técnicos).<br>
+            📌 <strong>Partic.:</strong> Pontos para o Prêmio Final (Soma de PRs mergeados + Reviews realizados).
         </div>
 
         <div class="footer">
             Gerado em: {now_str} | Regras CALMS<br>
-            <strong>Aviso:</strong> os pontos de liderança são apenas para nota na disciplina e não para contabilização do placar.
+            <strong>Aviso:</strong> O bônus de liderança (+{LEADERSHIP_BONUS:.0f}) é contabilizado apenas na nota final da disciplina e não aparece neste placar.
         </div>
     </div>
 </body>
