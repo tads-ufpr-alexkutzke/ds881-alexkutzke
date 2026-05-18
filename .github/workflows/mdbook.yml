@@ -75,7 +75,7 @@ jobs:
 
           python3 generate_scoreboard.py \
             -r "ds881-2026-alexkutzke/ds881-devmarket-2026-1-n" \
-            -s "2026-05-06T21:00:00-03:00" \
+            -s "2026-05-06T22:00:00-03:00" \
             -i ds881-2026-1-n-alunos.csv \
             -o ds881-2026-1-n-placar.html \
             -w 5 

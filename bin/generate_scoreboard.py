@@ -420,7 +420,7 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
 
         # Leadership bonus
         if fixed_role:
-            all_details.append(f"👑liderança +{leadership_bonus:.0f}")
+            all_details.append(f"👑liderança +{leadership_bonus:.0f} (apenas para nota)")
 
         # High Productivity bonus
         if high_prod_bonus > 0:
