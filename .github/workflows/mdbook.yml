@@ -70,7 +70,9 @@ jobs:
             -s "2026-05-07T14:30:00-03:00" \
             -i ds881-2026-1-t-alunos.csv \
             -o ds881-2026-1-t-placar.html \
-            -w 5 
+            -w 5 \
+            --no-participation
+
           python3 generate_scoreboard.py \
             -r "ds881-2026-alexkutzke/ds881-devmarket-2026-1-n" \
             -s "2026-05-06T21:00:00-03:00" \
