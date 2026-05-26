@@ -27,6 +27,7 @@ LEADERSHIP_BONUS = 2.0             # one-time, if student has a fixed role
 DEV_SOPS_GROUP = "Grupo A"          # DevOps group for week-based tracking (simplified)
 TECH_LEAD_ROLE = "Tech Lead Frontend"
 PO_SM_ROLES = {"Product Owner", "Scrum Master"}
+GRACE_PERIOD = timedelta(hours=2)
 
 DEFAULT_TOTAL_WEEKS = 16
 DEFAULT_STUDENTS_FILE = "alunos.csv"
@@ -114,17 +115,28 @@ def validate_repo(raw: str):
 # ── Week generation ─────────────────────────────────────────────────────────
 
 def generate_weeks(project_start: datetime, num_weeks: int):
-    """Generate *num_weeks* week boundaries anchored on *project_start* (in BRT)."""
-    return [
-        {
+    """Generate *num_weeks* week boundaries anchored on *project_start* (in BRT).
+    The transition point between weeks is shifted by GRACE_PERIOD (2 hours).
+    """
+    weeks = []
+    for i in range(num_weeks):
+        # Week 1 starts at project_start.
+        # Subsequent weeks start at (project_start + i weeks) + GRACE_PERIOD.
+        start = project_start + timedelta(weeks=i)
+        if i > 0:
+            start += GRACE_PERIOD
+            
+        # All weeks end at (project_start + (i+1) weeks) + GRACE_PERIOD.
+        end = project_start + timedelta(weeks=i + 1) + GRACE_PERIOD
+        
+        weeks.append({
             "name": f"Semana {i + 1}",
-            "start": project_start + timedelta(weeks=i),
-            "end": project_start + timedelta(weeks=i + 1),
-            "start_str": (project_start + timedelta(weeks=i)).strftime("%d/%m"),
-            "end_str": (project_start + timedelta(weeks=i + 1)).strftime("%d/%m %H:%M"),
-        }
-        for i in range(num_weeks)
-    ]
+            "start": start,
+            "end": end,
+            "start_str": start.strftime("%d/%m"),
+            "end_str": end.strftime("%d/%m %H:%M"),
+        })
+    return weeks
 
 
 def active_weeks(weeks, now=None):
@@ -468,7 +480,8 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime, show_p
         "segunda-feira", "terça-feira", "quarta-feira",
         "quinta-feira", "sexta-feira", "sábado", "domingo"
     ]
-    start_day_name = days_pt[project_start.weekday()]
+    deadline_dt = project_start + GRACE_PERIOD
+    start_day_name = days_pt[deadline_dt.weekday()]
 
     # Table header
     table_headers = "<tr><th>Aluno</th><th>Grupo</th><th>Papel</th>"
@@ -570,7 +583,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime, show_p
 <body>
     <div class="container">
         <h1>🏆 DevMarket — Placar de Engajamento</h1>
-        <p class="period-info">Período: {period_start} a {last_week["end_str"]} | Encerra {start_day_name} às {project_start.strftime("%H:%M")} BRT</p>
+        <p class="period-info">Período: {period_start} a {last_week["end_str"]} | Encerra {start_day_name} às {deadline_dt.strftime("%H:%M")} BRT</p>
 
         {podium_html}
 
