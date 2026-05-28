@@ -356,6 +356,7 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
         student_devops_group = student["devops_group"]
         is_tech_lead = fixed_role == TECH_LEAD_ROLE
         is_po_sm = fixed_role in PO_SM_ROLES if fixed_role else False
+        is_devops = student_devops_group.strip().upper() == "GRUPO A"
 
         # One-time bonuses
         leadership_bonus = LEADERSHIP_BONUS if fixed_role else 0.0
