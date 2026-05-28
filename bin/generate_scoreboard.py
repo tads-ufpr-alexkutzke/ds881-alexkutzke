@@ -24,10 +24,24 @@ BRT = timezone(timedelta(hours=-3))  # Brasília time (UTC-3)
 # Scoring rules
 WEEKLY_ENGAGEMENT_POINTS = 1.0    # max per week
 LEADERSHIP_BONUS = 2.0             # one-time, if student has a fixed role
-DEV_SOPS_GROUP = "Grupo A"          # DevOps group for week-based tracking (simplified)
 TECH_LEAD_ROLE = "Tech Lead Frontend"
 PO_SM_ROLES = {"Product Owner", "Scrum Master"}
 GRACE_PERIOD = timedelta(hours=2)
+
+# Qualitative Participation Weights (Final Prize)
+WEIGHT_PR_INFRA = 2.0        # DevOps, CI, Docker, Tests
+WEIGHT_PR_DEFAULT = 1.0      # Standard features
+WEIGHT_PR_DOCS = 0.2         # README, CONTRIBUTORS, typos
+WEIGHT_REVIEW_FEEDBACK = 1.5 # Reviews with comments (> 20 chars)
+WEIGHT_REVIEW_EMPTY = 0.5    # Just approval or very short comment
+
+# DevOps rotation mapping (Week index -> Active Group)
+DEVOPS_ROTATION = {
+    0: "Grupo A",
+    1: "Grupo B",
+    2: "Grupo C",
+    3: "Grupo D"
+}
 
 DEFAULT_TOTAL_WEEKS = 16
 DEFAULT_STUDENTS_FILE = "alunos.csv"
@@ -234,7 +248,48 @@ def fetch_path_commits(repo: str, path: str, since: datetime):
     )
 
 
+def fetch_pr_files(repo: str, pr_number: int):
+    """Fetch the list of files changed in a pull request."""
+    return fetch_github_data(repo, f"pulls/{pr_number}/files")
+
+
 # ── Scoring ─────────────────────────────────────────────────────────────────
+
+def _get_pr_weight(pr: dict, repo: str):
+    """Determine qualitative weight of a PR based on its content/title."""
+    title = pr.get("title", "").upper()
+    
+    # 1. Check by title/labels keywords (fast)
+    infra_keywords = {"CI", "DOCKER", "WORKFLOW", "PIX", "INFRA", "PIPELINE", "TEST", "ARCHITECT"}
+    docs_keywords = {"DOCS", "README", "CONTRIBUTORS", "TYPO"}
+    
+    if any(k in title for k in infra_keywords):
+        return WEIGHT_PR_INFRA
+    if any(k in title for k in docs_keywords):
+        return WEIGHT_PR_DOCS
+        
+    # 2. Check by files (requires extra API call, only if title is ambiguous)
+    try:
+        files = fetch_pr_files(repo, pr["number"])
+        filenames = [f["filename"] for f in files]
+        
+        if any(f.startswith(".github/") or "Dockerfile" in f or "docker-compose" in f for f in filenames):
+            return WEIGHT_PR_INFRA
+        if all(f.endswith(".md") for f in filenames):
+            return WEIGHT_PR_DOCS
+    except Exception:
+        pass # Fallback to default if API fails
+
+    return WEIGHT_PR_DEFAULT
+
+
+def _get_review_weight(review: dict):
+    """Determine qualitative weight of a review based on comment length."""
+    body = (review.get("body") or "").strip()
+    if len(body) > 20:
+        return WEIGHT_REVIEW_FEEDBACK
+    return WEIGHT_REVIEW_EMPTY
+
 
 def _parse_commit_date(commit: dict):
     """Extract commit date string safely from a GitHub commit object."""
@@ -292,13 +347,13 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
                 "role": student["fixed_role"] or "Desenvolvedor",
                 "weekly_scores": [],
                 "cumulative": 0.0,
-                "participation_points": 0,
+                "participation_points": 0.0,
                 "details": "Usuário GitHub não informado",
             })
             continue
 
         fixed_role = student["fixed_role"]
-        is_devops = student["devops_group"] == DEV_SOPS_GROUP  # simplified — see note
+        student_devops_group = student["devops_group"]
         is_tech_lead = fixed_role == TECH_LEAD_ROLE
         is_po_sm = fixed_role in PO_SM_ROLES if fixed_role else False
 
@@ -316,7 +371,8 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
         num_merged = len(merged_prs)
 
         # Technical Obligation (2.0 pts): 2 merged PRs + 2 reviews
-        total_reviews = len(user_reviews.get(username, []))
+        student_reviews = user_reviews.get(username, [])
+        total_reviews = len(student_reviews)
         tech_obligation_done = num_merged >= 2 and total_reviews >= 2
         tech_obligation_points = 2.0 if tech_obligation_done else 0.0
 
@@ -330,6 +386,9 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
         weekly_scores = []
 
         for i, week in enumerate(weeks):
+            active_devops_group = DEVOPS_ROTATION.get(i, "N/A")
+            is_devops_this_week = student_devops_group == active_devops_group
+
             ws_start, ws_end = week["start"], week["end"]
             week_score = 0.0
             week_engaged = False
@@ -349,15 +408,15 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
 
             # Reviews submitted
             reviews_in_week = sum(
-                1 for r in user_reviews.get(username, [])
+                1 for r in student_reviews
                 if _is_in_week(_safe_parse_github_dt(r.get("submitted_at")), week)
             )
             if reviews_in_week:
                 week_engaged = True
                 week_details.append(f"{reviews_in_week} review(s)")
 
-            # DevOps commits (applies to Grupo A students in every week — simplified)
-            if is_devops:
+            # DevOps commits (applies to student in their active week)
+            if is_devops_this_week:
                 commits_in_week = sum(
                     1 for c in all_commits
                     if c.get("author")
@@ -395,22 +454,27 @@ def calculate_scores(students, all_prs, all_commits, all_issues, weeks, repo: st
             })
 
         # ── Cumulative (Scoreboard ranking) ──────────────────────────────
-        # Note: Leadership bonus is NOT summed for the scoreboard as per request.
         weekly_total = sum(ws["score"] for ws in weekly_scores)
         cumulative = (
             weekly_total + 
             tech_obligation_points + high_prod_bonus
         )
 
-        # Participation Points for Final Prize (merged PRs + total reviews)
-        participation_points = num_merged + total_reviews if show_participation else 0
+        # Qualitative Participation Points (Final Prize)
+        # Weighted PRs + Weighted Reviews
+        participation_points = 0.0
+        if show_participation:
+            for pr in merged_prs:
+                participation_points += _get_pr_weight(pr, repo)
+            for r in student_reviews:
+                participation_points += _get_review_weight(r)
 
         # ── Details string ───────────────────────────────────────────────
         all_details = []
 
         # Participation Breakdown
         if show_participation:
-            all_details.append(f"🏆Partic: {num_merged} PRs merged + {total_reviews} reviews")
+            all_details.append(f"🏆Partic Qualitativa: {participation_points:.1f} pts (PRs ponderados + Reviews c/ feedback)")
 
         # Technical Obligation tag
         tech_tag = "✅" if tech_obligation_done else "❌"
@@ -510,7 +574,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime, show_p
         row += f'<td class="score">{item["cumulative"]:.1f}</td>'
         
         if show_participation:
-            row += f'<td class="score">{item["participation_points"]}</td>'
+            row += f'<td class="score">{item["participation_points"]:.1f}</td>'
             
         row += f'<td class="details">{item["details"]}</td></tr>'
         table_rows_parts.append(row)
@@ -528,7 +592,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime, show_p
                         <div style="font-size:2em;">{icon}</div>
                         <div style="font-weight:bold;">{item['name']}</div>
                         <div style="font-size:0.85em;color:#666;">{item['role']}</div>
-                        <div class="score">{item['participation_points']} pts</div>
+                        <div class="score">{item['participation_points']:.1f} pts</div>
                     </div>""")
         podium_items = "\n".join(podium_items_parts)
         podium_html = f"""
@@ -541,10 +605,21 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime, show_p
 
     # Participation help text
     participation_help = ""
+    disclaimer_premio = ""
     if show_participation:
         participation_help = f"""
             📌 <strong>Nota:</strong> Pontos para a disciplina (até {WEEKLY_ENGAGEMENT_POINTS:.1f} pt/semana + bônus técnicos).<br>
-            📌 <strong>Partic.:</strong> Pontos para o Prêmio Final (Soma de PRs mergeados + Reviews realizados)."""
+            📌 <strong>Partic.:</strong> Pontos Qualitativos para o Prêmio Final (PRs ponderados por impacto + Reviews com feedback técnico)."""
+        
+        disclaimer_premio = f"""
+            <div style="margin-top:20px; padding:15px; background:#f9f9f9; border-left:4px solid #27ae60; text-align:left; font-size:0.85em;">
+                <strong>Critérios de Pontuação Qualitativa (Prêmio Final):</strong><br>
+                • <strong>PR de Infraestrutura ({WEIGHT_PR_INFRA} pts):</strong> Alterações em CI/CD, Docker, scripts de automação ou testes de arquitetura.<br>
+                • <strong>PR de Feature ({WEIGHT_PR_DEFAULT} pts):</strong> Desenvolvimento de funcionalidades e lógica de negócio.<br>
+                • <strong>PR de Documentação/Typo ({WEIGHT_PR_DOCS} pts):</strong> Ajustes em README, CONTRIBUTORS ou correções ortográficas.<br>
+                • <strong>Review com Feedback ({WEIGHT_REVIEW_FEEDBACK} pts):</strong> Revisões com comentários técnicos ou sugestões de melhoria (>20 caracteres).<br>
+                • <strong>Review Simples ({WEIGHT_REVIEW_EMPTY} pts):</strong> Aprovações sem comentários detalhados.
+            </div>"""
     else:
         participation_help = f"📌 <strong>Nota Final:</strong> Pontos para a disciplina (até {WEEKLY_ENGAGEMENT_POINTS:.1f} pt/semana + bônus técnicos)."
 
@@ -600,6 +675,7 @@ def generate_html(scoreboard, weeks_for_display, project_start: datetime, show_p
 
         <div class="week-subtitle">
             {participation_help}
+            {disclaimer_premio}
         </div>
 
         <div class="footer">
